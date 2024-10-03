@@ -7,9 +7,9 @@ import (
 	"syscall"
 )
 
-func CreateProcess(name string, args ...string) error {
-	program := name
-	for _, arg := range args {
+func CreateProcess(args ...string) error {
+	var program = strings.ReplaceAll(args[0], `\`, `\\`)
+	for _, arg := range args[1:] {
 		arg = strings.ReplaceAll(arg, `\`, `\\`)
 		if strings.Contains(arg, " ") {
 			arg = `"` + arg + `"`

@@ -1,29 +1,20 @@
 package main
 
 import (
-	"github.com/Mmx233/Hide/command"
+	"fmt"
 	"github.com/Mmx233/Hide/tools"
 	"log"
-	"os/exec"
+	"os"
 )
 
 func main() {
-	config, err := command.New()
-	if err != nil {
-		log.Fatalln("parse command arguments failed:", err)
+	if len(os.Args) < 2 {
+		fmt.Println("args is required")
 	}
-
-	if config.CreateProcess {
-		err = tools.CreateProcess(config.Name, config.Args...)
-		if err != nil {
-			log.Fatalln(err)
-		} else {
-			log.Println("process created successfully")
-		}
+	err := tools.CreateProcess(os.Args[1:]...)
+	if err != nil {
+		log.Fatalln(err)
 	} else {
-		err := exec.Command(config.Name, config.Args...).Run()
-		if err != nil {
-			log.Fatalln(err)
-		}
+		log.Println("process created successfully")
 	}
 }
