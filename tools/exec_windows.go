@@ -9,10 +9,15 @@ import (
 
 func CreateProcess(name string, args ...string) error {
 	program := name
-	if len(args) != 0 {
-		program += " " + strings.Join(args, " ")
+	for _, arg := range args {
+		arg = strings.ReplaceAll(arg, `\`, `\\`)
+		if strings.Contains(arg, " ") {
+			arg = `"` + arg + `"`
+		}
+		program = program + " " + arg
 	}
-	cmdLine, err := windows.UTF16PtrFromString(strings.Replace(program, `/`, `\\`, -1))
+
+	cmdLine, err := windows.UTF16PtrFromString(program)
 	if err != nil {
 		return err
 	}
