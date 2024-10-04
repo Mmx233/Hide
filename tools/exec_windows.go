@@ -3,34 +3,22 @@ package tools
 import (
 	"golang.org/x/sys/windows"
 	"os"
-	"strings"
+	"os/exec"
 	"syscall"
 )
 
-func CreateProcess(args ...string) error {
-	var program = strings.ReplaceAll(args[0], `\`, `\\`)
-	for _, arg := range args[1:] {
-		arg = strings.ReplaceAll(arg, `\`, `\\`)
-		if strings.Contains(arg, " ") {
-			arg = `"` + arg + `"`
-		}
-		program = program + " " + arg
-	}
-
-	cmdLine, err := windows.UTF16PtrFromString(program)
-	if err != nil {
-		return err
-	}
-
+func CreateProcess(name string, args ...string) error {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	var procInfo syscall.ProcessInformation
-	startupInfo := &syscall.StartupInfo{}
-	return syscall.CreateProcess(
-		nil, cmdLine,
-		nil, nil, false, windows.CREATE_NO_WINDOW, nil,
-		windows.StringToUTF16Ptr(pwd), startupInfo, &procInfo)
+	cmd := exec.Command(name, args...)
+	cmd.Dir = pwd
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:       true,
+		CreationFlags:    windows.CREATE_NEW_CONSOLE | windows.CREATE_NO_WINDOW,
+		NoInheritHandles: true,
+	}
+	return cmd.Start()
 }
